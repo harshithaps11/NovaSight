@@ -1,121 +1,78 @@
 # NovaSight
-Project Overview
-NovaSight is an intelligent object detection system designed for space stations that identifies critical tools (toolboxes, oxygen tanks, fire extinguishers) using synthetic data from Duality AI's Falcon platform. Key innovations include:
+# NovaSight: Intelligent Object Detection for Space Stations
 
-Context-aware prioritization: Detection focus dynamically shifts based on environmental conditions (oxygen levels, temperature)
+NovaSight is an intelligent object detection system designed to identify and track critical tools inside a space station — including toolboxes, oxygen tanks, and fire extinguishers — using only synthetic data from Duality AI’s Falcon platform. Going beyond basic detection, NovaSight introduces context-aware prioritization, where detection focus shifts based on environmental conditions like oxygen levels or temperature. The system features a self-improving feedback loop that identifies weak performance areas (e.g., occlusion, lighting issues) and uses Falcon to generate improved synthetic data for retraining. As a bonus, we propose a lightweight AR-based mobile companion app to assist astronauts in real-time tool identification, even in emergencies or low visibility. NovaSight is scalable, adaptive, and built with real deployment in mind. It showcases how synthetic data, combined with smart design, can build robust AI solutions for safety-critical environments like space stations.
 
-Self-improving feedback loop: Identifies weak performance areas (occlusion, lighting issues) and uses Falcon to generate improved synthetic data for retraining
+---
 
-AR Companion App: Lightweight augmented reality mobile application for real-time tool identification in emergencies or low visibility
+## Table of Contents
 
-Step-by-Step Instructions
-1. Clone Repository
-bash
-git clone [https://github.com/yourusername/space-station-object-detection.git](https://github.com/harshithaps11/NovaSight.git)
-cd NovaSight
-2. Environment Setup
-bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-3. Download Dataset
-Place Falcon-generated synthetic dataset in data/ directory
+- [Features](#features)
+- [Step-by-Step Instructions](#step-by-step-instructions)
+- [Reproducing Final Results](#reproducing-final-results)
+- [Environment and Dependencies](#environment-and-dependencies)
+- [Expected Outputs and Interpretation](#expected-outputs-and-interpretation)
+- [Additional Notes](#additional-notes)
 
-Structure: images/ and labels/ folders
+---
 
-4. Train Model with Context-Aware Parameters
-bash
-python train.py --data data/dataset.yaml --context oxygen_level=0.85,temp=22
-Context parameters adjust detection priorities during training
+## Features
 
-5. Run Inference with AR Companion App
-bash
-python ar_companion.py --weights runs/train/exp/weights/best.pt --source 0  # webcam
-Displays real-time AR overlay with object prioritization
+- **Robust object detection** for toolboxes, oxygen tanks, and fire extinguishers
+- **Context-aware prioritization**: Focuses detection based on environmental data (e.g., low oxygen, high temperature)
+- **Self-improving feedback loop**: Identifies weak spots and retrains using new synthetic data from Falcon
+- **AR-based mobile companion app** for real-time tool identification and emergency assistance
+- **Scalable and adaptive** for real-world deployment in space environments
 
-6. Start Feedback Loop
-bash
-python feedback_loop.py --results runs/val/ --falcon-api-key YOUR_KEY
-Automatically generates new synthetic data for weak performance areas
+---
 
-Reproducing Final Results
-Baseline Results:
+## Step-by-Step Instructions
 
-bash
-python val.py --data data/dataset.yaml --weights models/baseline.pt
-Context-Aware Results:
+1. **Clone the Repository**
+https://github.com/harshithaps11/NovaSight.git
 
-bash
-python val.py --data data/dataset.yaml --weights models/context_aware.pt --context oxygen_level=0.85
-Feedback Loop Results:
 
-bash
-python val.py --data data/retrained_dataset.yaml --weights models/retrained.pt
-Environment Requirements
-Python: 3.10+
+2. **Set Up the Environment**
+- (Recommended) Create and activate a virtual environment:
+  ```
+  python3 -m venv venv
+  source venv/bin/activate
+  ```
+- Install dependencies:
+  ```
+  pip install -r requirements.txt
+  ```
 
-Core Dependencies:
+3. **Prepare the Dataset**
+- Place the Falcon-generated synthetic dataset in the `data/` directory. Organize as:
+  ```
+  data/
+    images/
+    labels/
+  ```
 
-ultralytics==8.0.0
+4. **Train the Model**
+python train.py --data data/dataset.yaml --epochs 100 --img 640 --batch 16 --weights yolov8n.pt
 
-torch==2.0.1
+5. **Test/Evaluate the Model**
 
-opencv-contrib-python==4.8.0
 
-dualityai-falcon==1.2.0
+6. **Run Inference**
 
-AR Companion Dependencies:
 
-pyarkit==0.5.3
+7. **Engage Feedback Loop for Self-Improvement**
 
-flask==2.3.2
 
-Expected Outputs
-Detection Outputs
-Output Type	Location	Interpretation
-Bounding Boxes	runs/detect/	Objects annotated with class labels and confidence scores
-Priority Heatmap	runs/priority/	Color-coded visualization of detection priorities
-AR Overlay	Mobile screen	Real-time object identification with contextual alerts
-Evaluation Metrics
-Metric	Interpretation
-Contextual mAP	Detection accuracy under specific environmental conditions
-Priority Shift Efficiency	Time-to-detection for high-priority objects during simulated emergencies
-Failure Case Reduction	Percentage improvement in previously weak scenarios after retraining
-System Architecture
-text
-graph LR
-A[Falcon Synthetic Data] --> B[YOLOv8 Training]
-B --> C[Context-Aware Detection]
-C --> D[AR Companion App]
-D --> E[Performance Analysis]
-E --> F[Failure Case Identification]
-F --> A
-Additional Features
-Emergency Mode:
+8. **Launch AR Companion App (Optional)**
+- Follow instructions in `ar_app/README.md` to deploy the mobile AR app for real-time tool identification.
 
-Trigger with --emergency flag to prioritize life-critical objects
+---
 
-Example: python detect.py --weights best.pt --source 0 --emergency fire
+## Reproducing Final Results
 
-Self-Improvement Dashboard:
+- Use the provided training and evaluation scripts with the same hyperparameters and data splits as in `config.yaml` and `data/dataset.yaml`.
+- The final, best-performing model weights are in `runs/train/exp/weights/best.pt`.
+- For context-aware evaluation, use:
 
-Run python dashboard.py to visualize:
 
-Performance gaps before/after retraining
 
-New synthetic data generated by Falcon
-
-Contextual performance metrics
-
-Zero-G Simulation Mode:
-
-Test detection in simulated microgravity environments:
-
-bash
-python detect.py --weights best.pt --source data/zero_g_sim/ --simulate zero_g
-Troubleshooting
-AR App Connection Issues: Ensure mobile device and host are on same network
-
-Falcon Data Generation: Verify API key in config/falcon.ini
-
-Context Parameters: Supported contexts: oxygen_level (0.0-1.0), temp (Celsius), emergency (fire/breach/tool_loss)
